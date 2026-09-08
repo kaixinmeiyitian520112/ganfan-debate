@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>干饭辩论赛 | 今日推荐</title>
+    <style>
+      :root {
+        color: #20242b;
+        background: #f4f7f5;
+        font-family: "Microsoft YaHei", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+      main {
+        width: min(920px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0;
+      }
+      header {
+        border-left: 6px solid #de5b2b;
+        padding-left: 18px;
+        margin-bottom: 32px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        letter-spacing: 0;
+      }
+      header p {
+        margin: 0;
+        color: #5c6470;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+        gap: 20px;
+        align-items: start;
+      }
+      section {
+        background: #fff;
+        border: 1px solid #dce3de;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(32, 36, 43, 0.06);
+      }
+      h2 {
+        font-size: 19px;
+        margin: 0 0 20px;
+      }
+      form {
+        display: grid;
+        gap: 16px;
+      }
+      .fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      label {
+        display: grid;
+        gap: 7px;
+        font-size: 14px;
+        color: #39414b;
+      }
+      input,
+      textarea {
+        font: inherit;
+        width: 100%;
+        border: 1px solid #b9c3bc;
+        border-radius: 5px;
+        padding: 10px 11px;
+        color: #20242b;
+        background: #fff;
+      }
+      textarea {
+        min-height: 74px;
+        resize: vertical;
+      }
+      input:focus,
+      textarea:focus {
+        outline: 3px solid rgba(32, 124, 92, 0.18);
+        border-color: #207c5c;
+      }
+      button {
+        cursor: pointer;
+        border: 0;
+        border-radius: 5px;
+        padding: 12px 16px;
+        color: #fff;
+        background: #207c5c;
+        font: inherit;
+        font-weight: 700;
+      }
+      button:hover {
+        background: #176448;
+      }
+      button:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+      .result {
+        min-height: 276px;
+        display: flex;
+        flex-direction: column;
+      }
+      .badge {
+        display: inline-block;
+        align-self: flex-start;
+        padding: 5px 9px;
+        border-radius: 4px;
+        background: #fff0e9;
+        color: #a5411c;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      #empty {
+        color: #6b7480;
+        line-height: 1.7;
+        margin: 20px 0;
+      }
+      #answer {
+        display: none;
+      }
+      #answer.show {
+        display: grid;
+        gap: 18px;
+      }
+      .dish {
+        color: #b7431b;
+        font-size: 29px;
+        margin: 4px 0 0;
+      }
+      .detail {
+        margin: 0;
+        line-height: 1.75;
+        color: #454d58;
+      }
+      .speech {
+        border-left: 4px solid #207c5c;
+        border-bottom: 1px solid #e5eae6;
+        padding: 12px 0 12px 14px;
+      }
+      .speech h3 {
+        margin: 6px 0;
+        color: #b7431b;
+      }
+      .speech small { color: #6b7480; }
+      .report {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 6px;
+        background: #fff8e8;
+        border: 1px solid #f2d59a;
+      }
+      .report h2 { margin-bottom: 8px; color: #9a5a00; }
+      .report p { margin: 8px 0; line-height: 1.7; }
+      .report-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+      .report-actions button { padding: 8px 11px; font-size: 13px; }
+      .speech-actions { margin-top: 8px; }
+      .speech-actions button { padding: 5px 8px; font-size: 12px; }
+      .form-actions, .history-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+      .history-bar { margin: 10px 0; }
+      .history-bar button, #stop { background: #8c3f36; }
+      .tip {
+        border-top: 1px solid #e5eae6;
+        padding-top: 15px;
+        color: #276a51;
+      }
+      .error {
+        color: #b42318;
+        background: #fff3f1;
+        border: 1px solid #ffd0c8;
+        border-radius: 5px;
+        padding: 10px;
+        display: none;
+      }
+      .error.show {
+        display: block;
+      }
+      @media (max-width: 680px) {
+        main {
+          padding: 32px 0;
+        }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .fields {
+          grid-template-columns: 1fr;
+        }
+        h1 {
+          font-size: 27px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>干饭辩论赛</h1>
+        <p>Sprint 4：自定义 Agent 名称、立场和人设，支持菜单约束、Docker 部署和 CI。</p>
+      </header>
+      <div class="layout">
+        <section>
+          <h2>告诉我你的情况</h2>
+          <form id="recommend-form">
+            <div class="fields">
+              <label
+                >口味偏好<input
+                  name="taste"
+                  value="想吃辣"
+                  required
+                  maxlength="100" /></label
+              ><label
+                >预算（元）<input
+                  name="budget"
+                  type="number"
+                  value="30"
+                  min="1"
+                  max="500"
+                  required
+              /></label>
+            </div>
+            <div class="fields">
+              <label
+                >天气<input
+                  name="weather"
+                  value="晴天"
+                  required
+                  maxlength="50" /></label
+              ><label
+                >忌口或过敏<input
+                  name="restrictions"
+                  value="无"
+                  maxlength="200"
+              /></label>
+            </div>
+            <label
+              >辣子哥名称<input name="spicy_name" value="辣子哥" maxlength="30" required /></label>
+            <label
+              >辣子哥立场<textarea
+                name="spicy_stance"
+                maxlength="100"
+                placeholder="例如：spicy、重口味、性价比优先"
+              ></textarea>
+            </label>
+            <label
+              >辣子哥人设<textarea
+                name="spicy_persona"
+                maxlength="200"
+                placeholder="例如：热血川菜大厨，敢吃敢辣"
+              ></textarea>
+            </label>
+            <label
+              >清补凉名称<input name="healthy_name" value="清补凉" maxlength="30" required /></label>
+            <label
+              >清补凉立场<textarea
+                name="healthy_stance"
+                maxlength="100"
+                placeholder="例如：healthy、清淡、低油低盐"
+              ></textarea>
+            </label>
+            <label
+              >清补凉人设<textarea
+                name="healthy_persona"
+                maxlength="200"
+                placeholder="例如：温和养生厨师，注重低油低盐"
+              ></textarea>
+            </label>
+            <label
+              >可用菜单<textarea
+                name="menu"
+                maxlength="3000"
+                placeholder="可选，可填写菜名；没有价格时由 Agent 按预算估算"
+              ></textarea>
+            </label>
+            <label>上传菜单文件（CSV/XLSX）<input id="menu-file" type="file" accept=".csv,.xlsx" /></label>
+            <p id="menu-file-status" class="detail"></p>
+            <label
+              >补充说明<textarea
+                name="note"
+                maxlength="300"
+                placeholder="例如：一个人吃、想要有汤、附近是食堂"
+              ></textarea>
+            </label>
+            <label
+              >辩论轮数<input
+                name="rounds"
+                type="number"
+                value="3"
+                min="1"
+                max="5"
+                required
+            /></label>
+            <div class="form-actions">
+              <button id="submit" type="submit">开始双厨辩论</button>
+              <button id="stop" type="button" hidden>终止当前辩论</button>
+            </div>
+            <p id="error" class="error" role="alert"></p>
+          </form>
+        </section>
+        <section class="result">
+          <span class="badge">双 Agent · SSE 实时辩论</span>
+          <div class="history-bar"><button id="history" type="button">历史战报</button><button id="favorites" type="button">我的收藏</button></div>
+          <div id="empty">
+            填写偏好后，两位大厨会轮流发言。双方各发言 3 次。
+          </div>
+          <div id="answer">
+            <div id="timeline"></div>
+            <div id="report" class="report" hidden></div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script>
+      const form = document.querySelector("#recommend-form");
+      const button = document.querySelector("#submit");
+      const stopButton = document.querySelector("#stop");
+      const error = document.querySelector("#error");
+      const historyButton = document.querySelector("#history");
+      const favoritesButton = document.querySelector("#favorites");
+      const answer = document.querySelector("#answer");
+      const empty = document.querySelector("#empty");
+      const timeline = document.querySelector("#timeline");
+      const report = document.querySelector("#report");
+      const menuFile = document.querySelector("#menu-file");
+      const menuFileStatus = document.querySelector("#menu-file-status");
+      let activeStream = null;
+      let resumeSession = null;
+      let activeSessionId = null;
+      menuFile.addEventListener("change", async () => {
+        const file = menuFile.files[0];
+        if (!file) return;
+        const body = new FormData(); body.append("file", file);
+        menuFileStatus.textContent = "正在读取菜单...";
+        try {
+          const response = await fetch("/api/menu/upload", { method: "POST", body });
+          const data = await response.json();
+          if (!response.ok) throw new Error(formatError(data.detail || data));
+          const field = form.elements.menu;
+          field.value = field.value.trim() ? `${field.value.trim()}\n${data.menu}` : data.menu;
+          menuFileStatus.textContent = `已加载 ${data.count} 条菜单；如同时填写文本菜单，两者会合并使用。`;
+        } catch (uploadError) { menuFileStatus.textContent = uploadError.message; }
+      });
+      const formatError = (detail) => {
+        if (typeof detail === "string") return detail;
+        if (Array.isArray(detail)) return detail.map((item) => item.msg || JSON.stringify(item)).join("；");
+        return detail?.message || JSON.stringify(detail || "请求失败，请稍后重试。");
+      };
+      const showMessage = (message) => { error.textContent = formatError(message); error.classList.add("show"); };
+      const createPoster = (data) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 900; canvas.height = 620;
+        const ctx = canvas.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 900, 620);
+        gradient.addColorStop(0, "#fff2df"); gradient.addColorStop(1, "#e3f4eb");
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, 900, 620);
+        ctx.fillStyle = "#20242b"; ctx.font = "bold 42px Microsoft YaHei";
+        ctx.fillText("干饭辩论赛 · 最终战报", 55, 80);
+        ctx.fillStyle = "#b7431b"; ctx.font = "bold 54px Microsoft YaHei";
+        ctx.fillText(`${data.winner}胜出`, 55, 165);
+        ctx.fillStyle = "#20242b"; ctx.font = "bold 36px Microsoft YaHei";
+        ctx.fillText(`推荐：${data.dish}`, 55, 245);
+        ctx.font = "26px Microsoft YaHei";
+        const scoreText = Object.entries(data.score).map(([name, value]) => `${name} ${value}`).join(" · ");
+        ctx.fillText(`比分：${scoreText}`, 55, 310);
+        ctx.font = "22px Microsoft YaHei";
+        const lines = String(data.summary).match(/.{1,30}/g) || [String(data.summary)];
+        lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, 55, 380 + index * 36));
+        ctx.fillStyle = "#276a51"; ctx.fillText(`弹幕：${data.barrage}`, 55, 525);
+        const link = document.createElement("a"); link.download = "ganfan-report.png"; link.href = canvas.toDataURL("image/png"); link.click();
+      };
+      const shareReport = async (data) => {
+        const text = `干饭辩论赛：${data.winner}胜出，推荐${data.dish}。${data.summary}`;
+        if (navigator.share) { try { await navigator.share({ title: "干饭辩论赛", text }); return; } catch {} }
+        await navigator.clipboard?.writeText(text);
+        error.textContent = "战报已复制到剪贴板。"; error.classList.add("show");
+      };
+      const renderReport = (data) => {
+        report.replaceChildren();
+        const heading = document.createElement("h2");
+        heading.textContent = `最终战报：${data.winner}胜出`;
+        const dish = document.createElement("p");
+        dish.textContent = `推荐菜品：${data.dish}`;
+        const score = document.createElement("p");
+        const scoreEntries = Object.entries(data.score).map(([name, value]) => `${name} ${value}`).join(" · ");
+        score.textContent = `比分：${scoreEntries}`;
+        const summary = document.createElement("p");
+        summary.textContent = data.summary;
+        const barrage = document.createElement("p");
+        barrage.textContent = `弹幕：${data.barrage}`;
+        const actions = document.createElement("div");
+        actions.className = "report-actions";
+        const posterButton = document.createElement("button");
+        posterButton.type = "button";
+        posterButton.textContent = "生成分享海报";
+        posterButton.addEventListener("click", () => createPoster(data));
+        const favoriteButton = document.createElement("button");
+        favoriteButton.type = "button";
+        favoriteButton.textContent = "收藏菜品";
+        favoriteButton.addEventListener("click", async () => {
+          if (!activeSessionId) return;
+          const response = await fetch("/api/favorites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ debate_id: activeSessionId, dish: data.dish }) });
+          showMessage(response.ok ? "菜品已收藏。" : "收藏失败，请稍后重试。");
+        });
+        const shareButton = document.createElement("button");
+        shareButton.type = "button";
+        shareButton.textContent = "分享战报";
+        shareButton.addEventListener("click", () => shareReport(data));
+        actions.append(posterButton, favoriteButton, shareButton);
+        report.append(heading, dish, score, summary, barrage, actions);
+        report.hidden = false;
+      };
+      const speak = async (text) => {
+        try {
+          const audio = new Audio(`/api/tts?voice=zh-CN-YunxiNeural&text=${encodeURIComponent(text)}`);
+          await audio.play();
+        } catch { error.textContent = "语音播放失败，请检查网络或浏览器自动播放权限。"; error.classList.add("show"); }
+      };
+      const playRoundSound = () => {
+        try {
+          const context = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.frequency.value = 660;
+          gain.gain.setValueAtTime(0.08, context.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.18);
+          oscillator.connect(gain).connect(context.destination);
+          oscillator.start();
+          oscillator.stop(context.currentTime + 0.18);
+        } catch {}
+      };
+      const renderSpeech = (speech) => {
+        const item = document.createElement("article");
+        item.className = "speech";
+        const title = document.createElement("strong");
+        title.textContent = `第${speech.round}轮 · ${speech.chef}`;
+        const dish = document.createElement("h3");
+        dish.textContent = speech.recommend;
+        const reason = document.createElement("p");
+        reason.className = "detail";
+        reason.textContent = speech.reason;
+        const meta = document.createElement("small");
+        meta.textContent = `立场：${speech.stance} · 评分：${speech.score}`;
+        const actions = document.createElement("div");
+        actions.className = "speech-actions";
+        const audioButton = document.createElement("button");
+        audioButton.type = "button";
+        audioButton.textContent = "🔊 播报";
+        audioButton.addEventListener("click", () => speak(`${speech.chef}推荐${speech.recommend}。${speech.reason}`));
+        actions.append(audioButton);
+        item.append(title, dish, reason, meta, actions);
+        timeline.appendChild(item);
+        empty.style.display = "none";
+        answer.classList.add("show");
+      };
+      async function restoreSession() {
+        const id = localStorage.getItem("ganfan-debate-id");
+        if (!id) return;
+        try {
+          const response = await fetch(`/api/debates/${id}`);
+          if (!response.ok) throw new Error("session unavailable");
+          const session = await response.json();
+          if (session.status === "FINISHED") {
+            localStorage.removeItem("ganfan-debate-id");
+            return;
+          }
+          for (const [name, value] of Object.entries(session.request)) {
+            const field = form.elements[name];
+            if (field) field.value = value;
+          }
+          resumeSession = session;
+          activeSessionId = session.id;
+          stopButton.hidden = false;
+          button.textContent = `继续上次辩论（已完成 ${session.history.length}/${session.request.rounds * 2} 条）`;
+          session.history.forEach(renderSpeech);
+          if (session.report) renderReport(session.report);
+        } catch {
+          localStorage.removeItem("ganfan-debate-id");
+        }
+      }
+      restoreSession();
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        error.classList.remove("show");
+        button.disabled = true;
+        button.textContent = "双厨正在交锋...";
+        const values = Object.fromEntries(new FormData(form));
+        values.budget = Number(values.budget);
+        values.rounds = Number(values.rounds);
+        timeline.innerHTML = "";
+        report.hidden = true;
+        report.textContent = "";
+        if (activeStream) activeStream.close();
+        try {
+          let session;
+          if (resumeSession) {
+            session = resumeSession;
+            resumeSession = null;
+            session.history.forEach((speech, index) => {
+              if (!timeline.children[index]) renderSpeech(speech);
+            });
+          } else {
+            const created = await fetch("/api/debates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(values),
+          });
+            const responseText = await created.text();
+            let createdData = {};
+            try { createdData = responseText ? JSON.parse(responseText) : {}; } catch { throw new Error("服务器返回了无效响应，请检查后端日志。"); }
+            if (!created.ok) throw new Error(formatError(createdData.detail || createdData) || `创建辩论失败（HTTP ${created.status}）。`);
+            if (!createdData.id) throw new Error("服务器未返回辩论会话 ID，请重启后端服务。");
+            session = createdData;
+          }
+          localStorage.setItem("ganfan-debate-id", session.id);
+          activeSessionId = session.id;
+          stopButton.hidden = false;
+          const stream = new EventSource(`/api/debates/${session.id}/stream`);
+          activeStream = stream;
+          let streamFinished = false;
+          const read = (event) => renderSpeech(JSON.parse(event.data));
+          stream.addEventListener("speech", read);
+          stream.addEventListener("report", (event) => renderReport(JSON.parse(event.data)));
+          stream.addEventListener("status", (event) => {
+            const status = JSON.parse(event.data);
+            if (status.status === "JUDGING") {
+              button.textContent = "裁判正在总结...";
+            }
+            if (status.round) playRoundSound();
+            if (status.status === "FINISHED" || status.status === "FAILED") {
+              streamFinished = true;
+              if (status.status === "FINISHED") localStorage.removeItem("ganfan-debate-id");
+              stream.close();
+              if (activeStream === stream) activeStream = null;
+              button.disabled = false;
+              button.textContent = "开始双厨辩论";
+              stopButton.hidden = true;
+            }
+          });
+          stream.addEventListener("stopped", (event) => {
+            streamFinished = true;
+            stream.close();
+            stopButton.hidden = true;
+            showMessage("辩论已终止，历史记录已保留。" );
+          });
+          stream.addEventListener("failure", (event) => {
+            streamFinished = true;
+            stream.close();
+            if (activeStream === stream) activeStream = null;
+            const data = JSON.parse(event.data);
+            const message = formatError(data.message || data);
+            showMessage(`${message || "辩论失败，请稍后重试。"} 刷新页面后可点击“继续上次辩论”。`);
+            button.disabled = false;
+            button.textContent = "继续上次辩论";
+          });
+          stream.onerror = () => {
+            stream.close();
+            if (!streamFinished && !error.classList.contains("show")) {
+              error.textContent = "辩论连接中断，进度已经保存；刷新页面后可点击“继续上次辩论”。";
+              error.classList.add("show");
+            }
+            if (activeStream === stream) activeStream = null;
+            button.disabled = false;
+            button.textContent = resumeSession ? "继续上次辩论" : "开始双厨辩论";
+          };
+        } catch (err) {
+          error.textContent = err.message;
+          error.classList.add("show");
+        } finally {
+          button.disabled = false;
+          button.textContent = "开始双厨辩论";
+        }
+      });
+      stopButton.addEventListener("click", async () => {
+        if (!activeSessionId) return;
+        await fetch("/api/debates/stop-all", { method: "POST" });
+        await fetch(`/api/debates/${activeSessionId}/stop`, { method: "POST" });
+        if (activeStream) activeStream.close();
+        localStorage.removeItem("ganfan-debate-id");
+        resumeSession = null; activeSessionId = null; stopButton.hidden = true; button.disabled = false; button.textContent = "开始双厨辩论";
+        showMessage("当前辩论已终止，历史记录仍保留在数据库中。" );
+      });
+      historyButton.addEventListener("click", async () => {
+        const response = await fetch("/api/debates");
+        const items = await response.json();
+        timeline.innerHTML = "";
+        items.slice(0, 20).forEach((item) => { const card = document.createElement("article"); card.className = "speech"; card.textContent = `${item.status} · ${item.request.taste} · ${item.report ? `推荐：${item.report.dish}` : `已完成 ${item.history.length} 条发言`}`; timeline.appendChild(card); });
+        answer.classList.add("show");
+      });
+      favoritesButton.addEventListener("click", async () => {
+        const response = await fetch("/api/favorites");
+        const items = await response.json();
+        timeline.innerHTML = "";
+        items.forEach((item) => { const card = document.createElement("article"); card.className = "speech"; card.textContent = `${item.dish} · ${item.note || "无备注"}`; timeline.appendChild(card); });
+        answer.classList.add("show");
+      });
+    </script>
+  </body>
+</html>

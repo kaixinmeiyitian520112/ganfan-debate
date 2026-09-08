@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./ganfan.sqlite3:/app/ganfan.sqlite3
+      - ./debates.json:/app/debates.json
+      - ./menu.csv:/app/menu.csv
+    restart: unless-stopped

@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+# 本地辩论会话进度，供刷新后恢复，不提交到仓库
+debates.json
+ganfan.sqlite3
+*.sqlite3
+*.sqlite3*
+*.log
+server*.log
+.vscode/
+.vscode/*.log
